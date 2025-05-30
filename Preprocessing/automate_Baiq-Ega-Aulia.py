@@ -105,11 +105,11 @@ def preprocess_data(input_path: str, output_path: str) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    # Path relative to project root
-    input_csv = os.path.join("Dataset", "online_shoppers_intention.csv")
-    output_csv = os.path.join("Dataset", "online_shoppers_intention_preprocessed.csv")
+    input_csv = "Preprocessing/Dataset/online_shoppers_intention.csv"
+    output_csv = "Preprocessing/Dataset/online_shoppers_intention_preprocessed_2.csv"
 
     processed_df = preprocess_data(input_csv, output_csv)
+
 
     print("\n Preprocessing completed.")
     print(" Preview of preprocessed data:")
