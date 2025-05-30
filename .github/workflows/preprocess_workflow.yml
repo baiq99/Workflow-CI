@@ -26,4 +26,4 @@ jobs:
 
     - name: Run preprocessing script
       run: |
-        python preprocessing/automate_Baiq-Ega-Aulia.py
+        python Preprocessing/automate_Baiq-Ega-Aulia.py
