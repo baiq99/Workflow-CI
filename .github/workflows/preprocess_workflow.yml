@@ -1,0 +1,29 @@
+name: Preprocessing Workflow
+
+on:
+  push:
+    paths:
+      - 'Preprocessing/**'
+      - '.github/workflows/**'
+  workflow_dispatch:  # Allow manual run from GitHub UI
+
+jobs:
+  run-preprocessing:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run preprocessing script
+      run: |
+        python preprocessing/automate_Baiq-Ega-Aulia.py
