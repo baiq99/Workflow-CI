@@ -19,15 +19,13 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install mlflow scikit-learn pandas joblib matplotlib
+      - name: Install MLflow
+        run: pip install mlflow
 
       - name: Run MLflow project
         run: |
           cd MLProject
-          mlflow run . --env-manager=local
+          mlflow run . --env-manager=local --experiment-name ci-run
 
       - name: Upload model artifact
         uses: actions/upload-artifact@v4
