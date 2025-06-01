@@ -1,4 +1,4 @@
-name: rf_env
+name: mlflow-env
 channels:
   - defaults
 dependencies:
