@@ -25,7 +25,7 @@ jobs:
       - name: Run MLflow project
         run: |
           cd MLProject
-          mlflow run . --env-manager=local --experiment-name ci-run
+          mlflow run . --env-manager=local
 
       - name: Upload model artifact
         uses: actions/upload-artifact@v4
