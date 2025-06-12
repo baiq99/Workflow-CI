@@ -30,24 +30,19 @@ def main(data_path):
     print("Accuracy:", acc)
     print("Classification Report:\n", report)
 
-    # === Simpan model lokal ===
+    # Buat folder output lokal
     os.makedirs("outputs", exist_ok=True)
-    local_model_path = os.path.join("outputs", "best_model.pkl")
+    local_model_path = "outputs/best_model.pkl"
     joblib.dump(model, local_model_path)
 
-    # === Logging ke MLflow DagsHub ===
-    mlflow.set_tracking_uri("https://dagshub.com/baiq99/ml_flow.mlflow")
-    os.environ["MLFLOW_TRACKING_USERNAME"] = os.getenv("DAGSHUB_USERNAME")
-    os.environ["MLFLOW_TRACKING_PASSWORD"] = os.getenv("DAGSHUB_TOKEN")
-
-    mlflow.set_experiment("Eksperimen_Modeling_Advance")
-
+    # Set MLflow lokal
+    mlflow.set_tracking_uri("file:mlruns")  # ✅ lokal
     with mlflow.start_run(run_name="Kriteria_3_Model"):
         mlflow.log_metric("accuracy", acc)
-        mlflow.log_artifact(local_model_path)
+        mlflow.log_artifact(local_model_path)  # relatif
         mlflow.sklearn.log_model(model, artifact_path="model")
 
-    print("✅ Model berhasil dilogging ke DagsHub MLflow.")
+    print("✅ Model berhasil dilogging ke MLflow lokal.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
