@@ -29,7 +29,7 @@ jobs:
         working-directory: ./MLProject
         run: |
           export MLFLOW_TRACKING_URI=file:./mlruns
-          mlflow run . --env-manager=local --no-conda
+          mlflow run . --env-manager=local
 
       - name: Build Docker image from MLflow model
         working-directory: ./MLProject
