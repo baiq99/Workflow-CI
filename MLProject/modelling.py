@@ -1,6 +1,8 @@
 import pandas as pd
 import joblib
 import argparse
+import mlflow
+import mlflow.sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
@@ -17,18 +19,26 @@ def main(data_path):
         X, y, test_size=0.2, random_state=42, stratify=y
     )
 
-    model = RandomForestClassifier(random_state=42)
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+    with mlflow.start_run():
+        model = RandomForestClassifier(random_state=42)
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
 
-    acc = accuracy_score(y_test, y_pred)
-    report = classification_report(y_test, y_pred)
-    
-    print("Accuracy:", acc)
-    print("Classification Report:\n", report)
+        acc = accuracy_score(y_test, y_pred)
+        report = classification_report(y_test, y_pred)
 
-    joblib.dump(model, "best_model.pkl")
-    print("✅ Model saved as 'best_model.pkl'")
+        print("Accuracy:", acc)
+        print("Classification Report:\n", report)
+
+        # ✅ Log model ke MLflow agar bisa dibuild jadi Docker image
+        mlflow.sklearn.log_model(model, artifact_path="model")
+
+        # ✅ Log metrik ke MLflow untuk pelacakan
+        mlflow.log_metric("accuracy", acc)
+
+        # ✅ Tetap simpan secara lokal jika dibutuhkan
+        joblib.dump(model, "best_model.pkl")
+        print("✅ Model saved as 'best_model.pkl'")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
