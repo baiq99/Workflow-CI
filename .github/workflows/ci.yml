@@ -1,34 +1,49 @@
-name: Train ML Model CI
+name: ML CI Pipeline
 
 on:
   push:
-    paths:
-      - 'MLProject/**'
-  workflow_dispatch:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  train-model:
+  train-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: 🔁 Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: 🧪 Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: '3.9'
+          activate-environment: mlflow-env
+          environment-file: MLProject/conda.yaml
+          auto-activate-base: false
 
-      - name: Install MLflow
-        run: pip install mlflow
-
-      - name: Run MLflow project
+      - name: 🧰 Install Python dependencies
         run: |
-          cd MLProject
+          pip install mlflow docker
+
+      - name: 📦 Run MLflow Project (retrain model)
+        working-directory: ./MLProject
+        run: |
+          export MLFLOW_TRACKING_URI=./mlruns
           mlflow run . --env-manager=local
 
-      - name: Upload model artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: best_model
-          path: MLProject/best_model.pkl
+      - name: 🔍 Build Docker image from MLflow model
+        working-directory: ./MLProject
+        run: |
+          # Ambil RUN ID terakhir dari mlruns
+          RUN_ID=$(ls -td mlruns/0/* | head -1 | xargs -n1 basename)
+
+          echo "RUN_ID=$RUN_ID"
+          
+          # Build Docker image dari model
+          mlflow models build-docker -m mlruns/0/$RUN_ID/artifacts/model -n mlflow_rf_image
+
+      - name: 🚀 Push Docker image to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker tag mlflow_rf_image baiqega/mlflow-rf:latest
+          docker push baiqega/mlflow-rf:latest
