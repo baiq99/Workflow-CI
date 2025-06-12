@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  train-and-deploy:
+  mlflow-run:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,36 +21,12 @@ jobs:
           environment-file: MLProject/conda.yaml
           auto-activate-base: false
 
-      - name: Install dependencies
+      - name: Install MLflow
         run: |
-          pip install mlflow scikit-learn pandas joblib matplotlib docker
+          pip install mlflow
 
-      - name: Clean up old MLflow runs
-        working-directory: ./MLProject
-        run: rm -rf mlruns/
-
-      - name: Run MLflow Project (local tracking)
+      - name: Run MLflow project
         working-directory: ./MLProject
         run: |
-          export MLFLOW_TRACKING_URI=file:./mlruns
+          export MLFLOW_TRACKING_URI=./mlruns
           mlflow run . --env-manager=local
-
-      - name: Build Docker image from MLflow model
-        working-directory: ./MLProject
-        run: |
-          export MLFLOW_TRACKING_URI=file:./mlruns
-          RUN_ID=$(ls -td mlruns/0/* | head -1 | xargs -n1 basename)
-          echo "RUN_ID=$RUN_ID"
-          if [ -d "mlruns/0/$RUN_ID/artifacts/model" ]; then
-            mlflow models build-docker -m mlruns/0/$RUN_ID/artifacts/model -n mlflow_rf_image
-          else
-            echo "❌ ERROR: Model artifact directory not found!"
-            exit 1
-          fi
-
-      - name: Push Docker image to Docker Hub
-        if: success()
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-          docker tag mlflow_rf_image baiqega/mlflow-rf:latest
-          docker push baiqega/mlflow-rf:latest
