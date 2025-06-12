@@ -31,22 +31,21 @@ def main(data_path):
     print("Accuracy:", acc)
     print("Classification Report:\n", report)
 
-    # Buat folder output lokal dalam direktori saat ini
-    output_dir = "outputs"
-    os.makedirs(output_dir, exist_ok=True)
-    local_model_path = os.path.join(output_dir, "best_model.pkl")
+    # Buat folder output lokal
+    os.makedirs("outputs", exist_ok=True)
+    local_model_path = "outputs/best_model.pkl"
 
-    # Simpan model dengan joblib
+    # Simpan model
     joblib.dump(model, local_model_path)
 
-    # Logging dengan MLflow lokal
-    mlflow.set_tracking_uri("file://" + os.path.abspath("mlruns"))
+    # Logging lokal MLflow
+    mlflow.set_tracking_uri("file:./mlruns")
     with mlflow.start_run():
         mlflow.log_metric("accuracy", acc)
-        mlflow.log_artifact(local_model_path)  # Path relatif yang aman
-        mlflow.sklearn.log_model(model, artifact_path="model")
+        mlflow.log_artifact("outputs/best_model.pkl")  # RELATIF ✅
+        mlflow.sklearn.log_model(model, artifact_path="model")  # model_path internal mlflow
 
-    print(f"✅ Model saved and logged. Path: {local_model_path}")
+    print("✅ Model berhasil disimpan dan dilogging ke MLflow.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
