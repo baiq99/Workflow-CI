@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
-
 def load_data(path):
     return pd.read_csv(path)
 
@@ -31,21 +30,24 @@ def main(data_path):
     print("Accuracy:", acc)
     print("Classification Report:\n", report)
 
-    # Buat folder output lokal
+    # === Simpan model lokal ===
     os.makedirs("outputs", exist_ok=True)
-    local_model_path = "outputs/best_model.pkl"
-
-    # Simpan model
+    local_model_path = os.path.join("outputs", "best_model.pkl")
     joblib.dump(model, local_model_path)
 
-    # Logging lokal MLflow
-    mlflow.set_tracking_uri("file:./mlruns")
-    with mlflow.start_run():
-        mlflow.log_metric("accuracy", acc)
-        mlflow.log_artifact("outputs/best_model.pkl")  # RELATIF ✅
-        mlflow.sklearn.log_model(model, artifact_path="model")  # model_path internal mlflow
+    # === Logging ke MLflow DagsHub ===
+    mlflow.set_tracking_uri("https://dagshub.com/baiq99/ml_flow.mlflow")
+    os.environ["MLFLOW_TRACKING_USERNAME"] = os.getenv("DAGSHUB_USERNAME")
+    os.environ["MLFLOW_TRACKING_PASSWORD"] = os.getenv("DAGSHUB_TOKEN")
 
-    print("✅ Model berhasil disimpan dan dilogging ke MLflow.")
+    mlflow.set_experiment("Eksperimen_Modeling_Advance")
+
+    with mlflow.start_run(run_name="Kriteria_3_Model"):
+        mlflow.log_metric("accuracy", acc)
+        mlflow.log_artifact(local_model_path)
+        mlflow.sklearn.log_model(model, artifact_path="model")
+
+    print("✅ Model berhasil dilogging ke DagsHub MLflow.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

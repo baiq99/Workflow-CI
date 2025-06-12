@@ -14,6 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set DagsHub credentials
+        run: |
+          echo "DAGSHUB_USERNAME=${{ secrets.DAGSHUB_USERNAME }}" >> $GITHUB_ENV
+          echo "DAGSHUB_TOKEN=${{ secrets.DAGSHUB_TOKEN }}" >> $GITHUB_ENV
+
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -21,14 +26,13 @@ jobs:
           environment-file: MLProject/conda.yaml
           auto-activate-base: false
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
-          pip install mlflow docker
+          pip install mlflow scikit-learn pandas joblib docker
 
       - name: Run MLflow Project (train model)
         working-directory: ./MLProject
         run: |
-          export MLFLOW_TRACKING_URI=./mlruns
           mlflow run . --env-manager=local
 
       - name: Build Docker image from MLflow model
