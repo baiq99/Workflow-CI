@@ -30,29 +30,30 @@ def main(data_path):
     print("Accuracy:", acc)
     print("Classification Report:\n", report)
 
-    # Simpan model ke folder outputs
+    # Simpan model ke lokal (optional, untuk keperluan manual)
     os.makedirs("outputs", exist_ok=True)
     model_path = os.path.join("outputs", "best_model.pkl")
     joblib.dump(model, model_path)
 
-    # Setup MLflow lokal
+    # MLflow logging setup
     mlflow.set_tracking_uri("file:./mlruns")
     with mlflow.start_run(run_name="Kriteria_3_Model"):
+        # Log metric dan file artefak lokal (opsional)
         mlflow.log_metric("accuracy", acc)
         mlflow.log_artifact(model_path)
 
-        # Tambahkan signature dan input_example agar build-docker tidak error
-        input_example = X_test.iloc[:5]
-        signature = infer_signature(X_test, y_pred)
+        # Log model untuk kebutuhan Docker build
+        input_example = X_test.iloc[:1]
+        signature = infer_signature(X_test, model.predict(X_test))
 
         mlflow.sklearn.log_model(
             sk_model=model,
-            artifact_path="model",
+            artifact_path="model",  # Penting untuk build-docker!
             input_example=input_example,
             signature=signature
         )
 
-    print("✅ Model berhasil disimpan dan dilogging ke MLflow.")
+    print("✅ Model berhasil dilogging ke MLflow dan siap dibuild ke Docker.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
