@@ -30,12 +30,12 @@ def main(data_path):
     print("Accuracy:", acc)
     print("Classification Report:\n", report)
 
-    # Simpan model ke folder relatif agar tidak error permission
+    # Simpan model ke path relatif (hindari /C: error di CI)
     os.makedirs("outputs", exist_ok=True)
     relative_model_path = os.path.join("outputs", "best_model.pkl")
     joblib.dump(model, relative_model_path)
 
-    # Logging ke MLflow lokal (file:./mlruns)
+    # Logging ke MLflow lokal
     mlflow.set_tracking_uri("file:./mlruns")
     with mlflow.start_run(run_name="Kriteria_3_Model"):
         mlflow.log_metric("accuracy", acc)
