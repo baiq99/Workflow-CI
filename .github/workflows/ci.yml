@@ -25,6 +25,10 @@ jobs:
         run: |
           pip install mlflow scikit-learn pandas joblib matplotlib docker
 
+      - name: Clean up old MLflow runs
+        working-directory: ./MLProject
+        run: rm -rf mlruns/
+
       - name: Run MLflow Project (local tracking)
         working-directory: ./MLProject
         run: |
