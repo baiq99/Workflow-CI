@@ -4,6 +4,7 @@ import joblib
 import argparse
 import mlflow
 import mlflow.sklearn
+from mlflow.models.signature import infer_signature
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
@@ -26,21 +27,30 @@ def main(data_path):
 
     acc = accuracy_score(y_test, y_pred)
     report = classification_report(y_test, y_pred)
-
     print("Accuracy:", acc)
     print("Classification Report:\n", report)
 
-    # Simpan model ke path relatif (hindari /C: error di CI)
+    # Simpan model ke folder outputs
     os.makedirs("outputs", exist_ok=True)
-    relative_model_path = os.path.join("outputs", "best_model.pkl")
-    joblib.dump(model, relative_model_path)
+    model_path = os.path.join("outputs", "best_model.pkl")
+    joblib.dump(model, model_path)
 
-    # Logging ke MLflow lokal
+    # Setup MLflow lokal
     mlflow.set_tracking_uri("file:./mlruns")
     with mlflow.start_run(run_name="Kriteria_3_Model"):
         mlflow.log_metric("accuracy", acc)
-        mlflow.log_artifact(relative_model_path)
-        mlflow.sklearn.log_model(model, artifact_path="model")
+        mlflow.log_artifact(model_path)
+
+        # Tambahkan signature dan input_example agar build-docker tidak error
+        input_example = X_test.iloc[:5]
+        signature = infer_signature(X_test, y_pred)
+
+        mlflow.sklearn.log_model(
+            sk_model=model,
+            artifact_path="model",
+            input_example=input_example,
+            signature=signature
+        )
 
     print("✅ Model berhasil disimpan dan dilogging ke MLflow.")
 

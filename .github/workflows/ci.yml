@@ -41,9 +41,15 @@ jobs:
           export MLFLOW_TRACKING_URI=file:./mlruns
           RUN_ID=$(ls -td mlruns/0/* | head -1 | xargs -n1 basename)
           echo "RUN_ID=$RUN_ID"
-          mlflow models build-docker -m mlruns/0/$RUN_ID/artifacts/model -n mlflow_rf_image
+          if [ -d "mlruns/0/$RUN_ID/artifacts/model" ]; then
+            mlflow models build-docker -m mlruns/0/$RUN_ID/artifacts/model -n mlflow_rf_image
+          else
+            echo "❌ ERROR: Model artifact directory not found!"
+            exit 1
+          fi
 
       - name: Push Docker image to Docker Hub
+        if: success()
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
           docker tag mlflow_rf_image baiqega/mlflow-rf:latest
