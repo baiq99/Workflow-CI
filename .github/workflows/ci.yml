@@ -35,7 +35,7 @@ jobs:
         working-directory: ./MLProject
         run: |
           RUN_ID=$(ls -td mlruns/0/* | head -1 | xargs -n1 basename)
-          echo "Using MLflow run ID: $RUN_ID"
+          echo "RUN_ID=$RUN_ID"
           mlflow models build-docker -m mlruns/0/$RUN_ID/artifacts/model -n mlflow_rf_image
 
       - name: Push Docker image to Docker Hub
