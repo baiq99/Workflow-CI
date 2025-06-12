@@ -30,19 +30,19 @@ def main(data_path):
     print("Accuracy:", acc)
     print("Classification Report:\n", report)
 
-    # Buat folder output lokal
+    # Simpan model ke folder relatif agar tidak error permission
     os.makedirs("outputs", exist_ok=True)
-    local_model_path = "outputs/best_model.pkl"
-    joblib.dump(model, local_model_path)
+    relative_model_path = os.path.join("outputs", "best_model.pkl")
+    joblib.dump(model, relative_model_path)
 
-    # Set MLflow lokal
-    mlflow.set_tracking_uri("file:mlruns")  # ✅ lokal
+    # Logging ke MLflow lokal (file:./mlruns)
+    mlflow.set_tracking_uri("file:./mlruns")
     with mlflow.start_run(run_name="Kriteria_3_Model"):
         mlflow.log_metric("accuracy", acc)
-        mlflow.log_artifact(local_model_path)  # relatif
+        mlflow.log_artifact(relative_model_path)
         mlflow.sklearn.log_model(model, artifact_path="model")
 
-    print("✅ Model berhasil dilogging ke MLflow lokal.")
+    print("✅ Model berhasil disimpan dan dilogging ke MLflow.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
