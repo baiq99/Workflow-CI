@@ -28,7 +28,7 @@ def main(data_path):
     print("Classification Report:\n", report)
 
     joblib.dump(model, "best_model.pkl")
-    print("✅ Model saved as 'best_model.pkl'")
+    print("Model saved as 'best_model.pkl'")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
