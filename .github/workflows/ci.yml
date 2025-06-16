@@ -21,8 +21,11 @@ jobs:
           environment-file: MLProject/conda.yaml
           auto-activate-base: false
 
+      - name: Install MLflow
+        run: |
+          pip install mlflow
+
       - name: Run MLflow project
-        shell: bash
         working-directory: ./MLProject
         run: |
           export MLFLOW_TRACKING_URI=./mlruns
