@@ -1,1 +1,1 @@
-https://github.com/baiq99/Workflow-CI.git
+https://github.com/baiq99/workflow-ci.git
